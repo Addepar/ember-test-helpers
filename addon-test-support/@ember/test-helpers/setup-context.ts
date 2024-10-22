@@ -4,7 +4,7 @@ import type Resolver from 'ember-resolver';
 import { setOwner } from '@ember/application';
 
 import buildOwner, { Owner } from './build-owner';
-import { _setupAJAXHooks, _teardownAJAXHooks } from './settled';
+import { _setupAJAXHooks } from './settled';
 import { _prepareOnerror } from './setup-onerror';
 import Ember from 'ember';
 import {
@@ -17,10 +17,6 @@ import { getResolver } from './resolver';
 import { getApplication } from './application';
 import { Promise } from './-utils';
 import getTestMetadata from './test-metadata';
-import {
-  registerDestructor,
-  associateDestroyableChild,
-} from '@ember/destroyable';
 import {
   getDeprecationsForContext,
   getDeprecationsDuringCallbackForContext,
@@ -189,20 +185,7 @@ export function resumeTest(): void {
 }
 
 /**
-  @private
-  @param {Object} context the test context being cleaned up
-*/
-function cleanup(context: BaseContext) {
-  _teardownAJAXHooks();
-
-  // SAFETY: this is intimate API *designed* for us to override.
-  (Ember as any).testing = false;
-
-  unsetContext();
-}
-
-/**
- * Returns deprecations which have occured so far for a the current test context
+ * Returns deprecations which have occurred so far for a the current test context
  *
  * @public
  * @returns {Array<DeprecationFailure>} An array of deprecation messages
@@ -386,8 +369,6 @@ export default function setupContext<T extends object>(
 
   _backburner.DEBUG = true;
 
-  registerDestructor(context, cleanup);
-
   _prepareOnerror(context);
 
   return Promise.resolve()
@@ -414,8 +395,6 @@ export default function setupContext<T extends object>(
       return buildOwner(getApplication(), getResolver());
     })
     .then((owner) => {
-      associateDestroyableChild(context, owner);
-
       Object.defineProperty(context, 'owner', {
         configurable: true,
         enumerable: true,
