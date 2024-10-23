@@ -11,12 +11,6 @@ import {
 
 let clickSteps = ['focus', 'focusin', 'input', 'change'];
 
-if (isIE11) {
-  clickSteps = ['focusin', 'input', 'change', 'focus'];
-} else if (isFirefox) {
-  clickSteps.push('selectionchange');
-}
-
 module('DOM Helper: fillIn', function (hooks) {
   if (!hasEmberVersion(2, 4)) {
     return;
